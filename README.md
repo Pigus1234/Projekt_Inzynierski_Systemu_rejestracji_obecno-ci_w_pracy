@@ -1,0 +1,2 @@
+# Projekt_Inzynierski_Systemu_rejestracji_obecno-ci_w_pracy
+Project for my engineering thesis
