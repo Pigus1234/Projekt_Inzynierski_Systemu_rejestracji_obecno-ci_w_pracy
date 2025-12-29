@@ -20,6 +20,24 @@
                     <p class="mt-2 text-sm text-slate-500">
                         @yield('pageSubtitle', 'Panel po zalogowaniu.')
                     </p>
+
+                    <nav class="mt-4 flex flex-wrap gap-2">
+                        <a
+                            href="{{ route('dashboard') }}"
+                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                            Dashboard
+                        </a>
+
+                        @can('access-administrator-panel')
+                            <a
+                                href="{{ route('administrator.users.index') }}"
+                                class="rounded-xl border border-brandBlue/20 bg-brandBlue/5 px-4 py-2 text-sm font-semibold text-brandBlueDark hover:bg-brandBlue/10"
+                            >
+                                Administrator
+                            </a>
+                        @endcan
+                    </nav>
                 </div>
 
                 <div class="flex flex-col items-start space-y-2 sm:items-end">
