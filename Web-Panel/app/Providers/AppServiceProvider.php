@@ -14,12 +14,20 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Gate::define('access-administrator-panel', function (User $user): bool {
+        Gate::before(function (User $user): ?bool {
             if ($user->role?->name === 'Administrator') {
                 return true;
             }
 
-            return $user->permissions()->where('key', 'administrator.panel')->exists();
+            return null;
         });
+
+        foreach (array_keys(config('permissions', [])) as $permissionKey) {
+            Gate::define($permissionKey, function (User $user) use ($permissionKey): bool {
+                return $user->permissions()
+                    ->where('key', $permissionKey)
+                    ->exists();
+            });
+        }
     }
 }

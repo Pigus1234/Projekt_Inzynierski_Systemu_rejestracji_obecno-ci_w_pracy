@@ -7,7 +7,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-brandBg antialiased text-slate-900">
-    <header class="bg-white border-b border-slate-200">
+    @php
+        $user = auth()->user();
+    @endphp
+
+    <header class="border-b border-slate-200 bg-white">
         <div class="h-1 w-full bg-gradient-to-r from-brandBlue via-brandBlueDark to-brandRed"></div>
 
         <div class="px-6 py-5">
@@ -22,31 +26,31 @@
                     </p>
 
                     <nav class="mt-4 flex flex-wrap gap-2">
-                        <a
-                            href="{{ route('dashboard') }}"
-                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                        >
+                        <x-ui.nav.link :href="route('dashboard')" activePattern="dashboard">
                             Dashboard
-                        </a>
+                        </x-ui.nav.link>
 
-                        @can('access-administrator-panel')
-                            <a
-                                href="{{ route('administrator.users.index') }}"
-                                class="rounded-xl border border-brandBlue/20 bg-brandBlue/5 px-4 py-2 text-sm font-semibold text-brandBlueDark hover:bg-brandBlue/10"
-                            >
+                        @can('employees.manage.view')
+                            <x-ui.nav.link :href="route('employees.index')" activePattern="employees.*">
+                                Pracownicy
+                            </x-ui.nav.link>
+                        @endcan
+
+                        @can('administrator.panel')
+                            <x-ui.nav.link :href="route('administrator.users.index')" activePattern="administrator.*">
                                 Administrator
-                            </a>
+                            </x-ui.nav.link>
                         @endcan
                     </nav>
                 </div>
 
                 <div class="flex flex-col items-start space-y-2 sm:items-end">
                     <x-ui.badge>
-                        {{ auth()->user()->role?->name ?? 'Brak roli' }}
+                        {{ $user?->role?->name ?? 'Brak roli' }}
                     </x-ui.badge>
 
                     <div class="text-sm font-semibold text-slate-900">
-                        {{ auth()->user()->name }}
+                        {{ $user?->name }}
                     </div>
 
                     <form method="POST" action="{{ route('logout') }}">

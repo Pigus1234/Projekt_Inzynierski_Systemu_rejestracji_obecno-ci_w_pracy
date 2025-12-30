@@ -36,7 +36,8 @@
                 <form method="POST" action="{{ route('administrator.users.destroy', $user) }}">
                     @csrf
                     @method('DELETE')
-                    <x-ui.button variant="danger" class="px-3 py-2">
+
+                    <x-ui.button type="submit" variant="danger" class="px-3 py-2">
                         Usuń
                     </x-ui.button>
                 </form>
