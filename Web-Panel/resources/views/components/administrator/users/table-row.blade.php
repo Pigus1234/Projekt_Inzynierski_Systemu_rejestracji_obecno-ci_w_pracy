@@ -6,6 +6,7 @@
     $isTargetAdministrator = $user->role?->name === 'Administrator';
     $isActingAdministrator = auth()->user()->role?->name === 'Administrator';
     $canManageThisUser = $isActingAdministrator || ! $isTargetAdministrator;
+    $isSelf = $user->id === auth()->id();
 @endphp
 
 <tr>
@@ -28,7 +29,11 @@
 
     <x-ui.table.data-cell align="right">
         <x-ui.action-group>
-            @if($canManageThisUser)
+            @if($isSelf)
+                <div class="text-sm font-semibold text-slate-400">
+                    Twoje konto
+                </div>
+            @elseif($canManageThisUser)
                 <a href="{{ route('administrator.users.edit', $user) }}">
                     <x-ui.button class="px-3 py-2">Edytuj</x-ui.button>
                 </a>
