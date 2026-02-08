@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdministratorUserController;
 use App\Http\Controllers\ArchivedEmployeeManagementController;
+use App\Http\Controllers\Attendance\AttendanceChangelogController;
+use App\Http\Controllers\Attendance\AttendanceDeviceManagementController;
+use App\Http\Controllers\Attendance\AttendancePresentController;
 use App\Http\Controllers\EmployeeManagementController;
 use App\Http\Controllers\UserSessionController;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +18,7 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/logout', [UserSessionController::class, 'destroySession'])->name('logout');
 });
 
@@ -28,6 +32,22 @@ Route::middleware(['auth', 'can:administrator.panel'])
         Route::get('/users/{user}/edit', [AdministratorUserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [AdministratorUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [AdministratorUserController::class, 'destroy'])->name('users.destroy');
+
+        Route::prefix('attendance-devices')
+            ->name('attendance-devices.')
+            ->group(function (): void {
+                Route::get('/', [AttendanceDeviceManagementController::class, 'index'])->name('index');
+                Route::get('/create', [AttendanceDeviceManagementController::class, 'create'])->name('create');
+                Route::post('/', [AttendanceDeviceManagementController::class, 'store'])->name('store');
+
+                Route::get('/{attendanceDevice}/edit', [AttendanceDeviceManagementController::class, 'edit'])->name('edit');
+                Route::put('/{attendanceDevice}', [AttendanceDeviceManagementController::class, 'update'])->name('update');
+
+                Route::post('/{attendanceDevice}/rotate-token', [AttendanceDeviceManagementController::class, 'rotateToken'])->name('rotate-token');
+
+                Route::patch('/{attendanceDevice}/activate', [AttendanceDeviceManagementController::class, 'activate'])->name('activate');
+                Route::patch('/{attendanceDevice}/deactivate', [AttendanceDeviceManagementController::class, 'deactivate'])->name('deactivate');
+            });
     });
 
 Route::middleware(['auth', 'can:employees.manage.view'])
@@ -63,4 +83,12 @@ Route::middleware(['auth', 'can:employees.manage.view'])
         Route::post('/archived/{employeeId}/restore', [ArchivedEmployeeManagementController::class, 'restore'])
             ->middleware('can:employees.manage.restore')
             ->name('restore');
+    });
+
+Route::middleware(['auth', 'can:attendance.changelog.view'])
+    ->prefix('attendance')
+    ->name('attendance.')
+    ->group(function (): void {
+        Route::get('/present', AttendancePresentController::class)->name('present');
+        Route::get('/changelog', AttendanceChangelogController::class)->name('changelog');
     });

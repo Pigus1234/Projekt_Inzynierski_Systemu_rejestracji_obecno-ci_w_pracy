@@ -4,7 +4,7 @@
 @section('pageSubtitle', 'Tworzenie konta użytkownika.')
 
 @section('content')
-    <div class="max-w-3xl space-y-6">
+    <div class="w-full max-w-none space-y-6">
         <x-ui.card eyebrow="Konto" title="Dodaj użytkownika">
             <form method="POST" action="{{ route('administrator.users.store') }}" class="space-y-6">
                 @csrf

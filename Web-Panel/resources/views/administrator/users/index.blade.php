@@ -4,7 +4,7 @@
 @section('pageSubtitle', 'Zarządzanie kontami i uprawnieniami.')
 
 @section('content')
-    <div class="max-w-5xl space-y-6">
+    <div class="w-full max-w-none space-y-6">
         <x-ui.flash-messages />
 
         <x-ui.card eyebrow="Konta" title="Użytkownicy systemu">

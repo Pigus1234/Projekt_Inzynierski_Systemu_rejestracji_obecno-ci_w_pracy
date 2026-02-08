@@ -4,7 +4,7 @@
 @section('pageSubtitle', 'Edycja danych pracownika.')
 
 @section('content')
-    <div class="max-w-3xl space-y-6">
+    <div class="w-full max-w-none space-y-6">
         <x-ui.card eyebrow="Pracownik" title="Edytuj pracownika">
             <form method="POST" action="{{ route('employees.update', $employee) }}" class="space-y-6">
                 @csrf

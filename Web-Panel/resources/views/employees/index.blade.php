@@ -4,7 +4,7 @@
 @section('pageSubtitle', 'Zarządzanie pracownikami i archiwizacja.')
 
 @section('content')
-    <div class="max-w-5xl space-y-6">
+    <div class="w-full max-w-none  space-y-6">
         <x-ui.flash-messages />
 
         <x-ui.card eyebrow="Pracownicy" title="Lista pracowników">

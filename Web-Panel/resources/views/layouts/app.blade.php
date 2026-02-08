@@ -41,6 +41,22 @@
                                 Administrator
                             </x-ui.nav.link>
                         @endcan
+                        
+                        @can('attendance.changelog.view')
+                            <x-ui.nav.link :href="route('attendance.present')" activePattern="attendance.present">
+                                Obecni
+                            </x-ui.nav.link>
+
+                            <x-ui.nav.link :href="route('attendance.changelog')" activePattern="attendance.changelog">
+                                Changelog odbić
+                            </x-ui.nav.link>
+                        @endcan
+                        
+                        @can('administrator-only')
+                            <x-ui.nav.link :href="route('administrator.attendance-devices.index')" activePattern="administrator.attendance-devices.*">
+                                Urządzenia
+                            </x-ui.nav.link>
+                        @endcan
                     </nav>
                 </div>
 

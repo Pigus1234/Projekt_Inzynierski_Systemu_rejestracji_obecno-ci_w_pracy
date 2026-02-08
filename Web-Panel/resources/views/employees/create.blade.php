@@ -4,7 +4,7 @@
 @section('pageSubtitle', 'Tworzenie nowego pracownika.')
 
 @section('content')
-    <div class="max-w-3xl space-y-6">
+    <div class="w-full max-w-none space-y-6">
         <x-ui.card eyebrow="Pracownik" title="Dodaj pracownika">
             <form method="POST" action="{{ route('employees.store') }}" class="space-y-6">
                 @csrf
