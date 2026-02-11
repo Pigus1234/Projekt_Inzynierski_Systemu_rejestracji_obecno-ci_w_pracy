@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdministratorUserController;
+use App\Http\Controllers\DepartmentManagementController;
 use App\Http\Controllers\ArchivedEmployeeManagementController;
 use App\Http\Controllers\Attendance\AttendanceChangelogController;
 use App\Http\Controllers\Attendance\AttendanceDeviceManagementController;
@@ -48,6 +49,18 @@ Route::middleware(['auth', 'can:administrator.panel'])
                 Route::patch('/{attendanceDevice}/activate', [AttendanceDeviceManagementController::class, 'activate'])->name('activate');
                 Route::patch('/{attendanceDevice}/deactivate', [AttendanceDeviceManagementController::class, 'deactivate'])->name('deactivate');
             });
+    });
+    
+Route::middleware(['auth', 'can:departments.manage'])
+    ->prefix('departments')
+    ->name('departments.')
+    ->group(function (): void {
+        Route::get('/', [DepartmentManagementController::class, 'index'])->name('index');
+        Route::get('/create', [DepartmentManagementController::class, 'create'])->name('create');
+        Route::post('/', [DepartmentManagementController::class, 'store'])->name('store');
+        Route::get('/{department}/edit', [DepartmentManagementController::class, 'edit'])->name('edit');
+        Route::put('/{department}', [DepartmentManagementController::class, 'update'])->name('update');
+        Route::delete('/{department}', [DepartmentManagementController::class, 'destroy'])->name('destroy');
     });
 
 Route::middleware(['auth', 'can:employees.manage.view'])

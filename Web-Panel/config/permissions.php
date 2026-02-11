@@ -12,4 +12,6 @@ return [
     'employees.manage.restore' => 'Widok archiwum i przywracanie pracowników',
 
     'administrator.panel' => 'Administrator',
+    
+    'departments.manage' => 'Zarządzanie działami',
 ];
