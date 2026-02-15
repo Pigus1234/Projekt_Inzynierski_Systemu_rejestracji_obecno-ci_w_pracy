@@ -4,25 +4,25 @@ namespace Database\Seeders;
 
 use App\Models\AttendanceDevice;
 use Illuminate\Database\Seeder;
-use RuntimeException;
+use Illuminate\Support\Facades\Schema;
 
 class AttendanceDeviceSeeder extends Seeder
 {
     public function run(): void
     {
-        $deviceName = (string) env('ATTENDANCE_PRIMARY_DEVICE_NAME', 'Arduino RFID Reader');
-        $plainToken = env('ATTENDANCE_PRIMARY_DEVICE_TOKEN');
+        $plainToken = 'local-development-attendance-device-token';
+        $attributes = [
+            'api_token_hash' => hash('sha256', $plainToken),
+            'is_active' => true,
+        ];
 
-        if (!is_string($plainToken) || $plainToken === '') {
-            throw new RuntimeException('Missing ATTENDANCE_PRIMARY_DEVICE_TOKEN in environment.');
+        if (Schema::hasColumn('attendance_devices', 'last_seen_at')) {
+            $attributes['last_seen_at'] = now();
         }
 
         AttendanceDevice::query()->updateOrCreate(
-            ['name' => $deviceName],
-            [
-                'api_token_hash' => hash('sha256', $plainToken),
-                'is_active' => true,
-            ],
+            ['name' => 'Urządzenie testowe'],
+            $attributes
         );
     }
 }

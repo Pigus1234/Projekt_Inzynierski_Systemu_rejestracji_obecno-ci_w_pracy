@@ -7,6 +7,7 @@ use App\Http\Controllers\ArchivedEmployeeManagementController;
 use App\Http\Controllers\Attendance\AttendanceChangelogController;
 use App\Http\Controllers\Attendance\AttendanceDeviceManagementController;
 use App\Http\Controllers\Attendance\AttendancePresentController;
+use App\Http\Controllers\Attendance\AttendanceEvacuationListPrintController;
 use App\Http\Controllers\EmployeeManagementController;
 use App\Http\Controllers\UserSessionController;
 use Illuminate\Support\Facades\Route;
@@ -98,10 +99,19 @@ Route::middleware(['auth', 'can:employees.manage.view'])
             ->name('restore');
     });
 
-Route::middleware(['auth', 'can:attendance.changelog.view'])
+Route::middleware(['auth'])
     ->prefix('attendance')
     ->name('attendance.')
     ->group(function (): void {
-        Route::get('/present', AttendancePresentController::class)->name('present');
-        Route::get('/changelog', AttendanceChangelogController::class)->name('changelog');
+        Route::get('/present', AttendancePresentController::class)
+            ->middleware('can:attendance.present.view')
+            ->name('present');
+
+        Route::get('/present/print', AttendanceEvacuationListPrintController::class)
+            ->middleware('can:attendance.present.print')
+            ->name('present.print');
+
+        Route::get('/changelog', AttendanceChangelogController::class)
+            ->middleware('can:attendance.changelog.view')
+            ->name('changelog');
     });
