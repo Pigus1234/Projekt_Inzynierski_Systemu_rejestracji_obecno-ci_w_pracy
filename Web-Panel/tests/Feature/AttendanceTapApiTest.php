@@ -3,127 +3,207 @@
 namespace Tests\Feature;
 
 use App\Models\AttendanceDevice;
+use App\Models\AttendanceEvent;
 use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class AttendanceTapApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testRequestRequiresDeviceToken(): void
+    public function test_tap_requires_device_authentication(): void
     {
         $response = $this->postJson('/api/attendance/tap', [
             'cardIdentifier' => 'A1B2C3D4',
         ]);
 
         $response->assertStatus(401);
-        $this->assertDatabaseCount('attendance_events', 0);
     }
 
-    public function testRequestReturnsNotFoundWhenEmployeeDoesNotExist(): void
+    public function test_unknown_employee_returns_404_and_creates_single_unknown_event_with_duplicate_lock(): void
     {
-        $token = 'test-token';
-        $this->createAttendanceDevice($token);
+        config(['attendance.duplicate_event_lock_seconds' => 8]);
 
-        $response = $this->withHeaders([
-            'X-Attendance-Device-Token' => $token,
-        ])->postJson('/api/attendance/tap', [
-            'cardIdentifier' => 'A1B2C3D4',
-        ]);
+        [$attendanceDevice, $plainToken] = $this->createAttendanceDevice();
+
+        $response = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'aa:bb-cc dd',
+            ]);
 
         $response->assertStatus(404);
-        $this->assertDatabaseCount('attendance_events', 0);
+        $response->assertJson([
+            'status' => 'error',
+            'error' => [
+                'code' => 'employee_not_found',
+            ],
+        ]);
+
+        $this->assertDatabaseHas('attendance_events', [
+            'employee_id' => null,
+            'attendance_device_id' => $attendanceDevice->id,
+            'event_type' => 'unknown_card_attempt',
+            'metadata->rfidUid' => 'AABBCCDD',
+            'metadata->errorCode' => 'employee_not_found',
+        ]);
+
+        $countAfterFirst = AttendanceEvent::query()
+            ->whereNull('employee_id')
+            ->where('event_type', 'unknown_card_attempt')
+            ->where('metadata->rfidUid', 'AABBCCDD')
+            ->count();
+
+        $this->assertSame(1, $countAfterFirst);
+
+        $response2 = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'aa:bb-cc dd',
+            ]);
+
+        $response2->assertStatus(404);
+
+        $countAfterSecond = AttendanceEvent::query()
+            ->whereNull('employee_id')
+            ->where('event_type', 'unknown_card_attempt')
+            ->where('metadata->rfidUid', 'AABBCCDD')
+            ->count();
+
+        $this->assertSame(1, $countAfterSecond);
     }
 
-    public function testRequestCreatesEntryThenExit(): void
+    public function test_known_employee_creates_entry_then_duplicate_returns_existing_then_after_lock_creates_exit(): void
     {
-        $token = 'test-token';
-        $this->createAttendanceDevice($token);
+        config(['attendance.duplicate_event_lock_seconds' => 8]);
+
+        [$attendanceDevice, $plainToken] = $this->createAttendanceDevice();
 
         $employee = Employee::query()->create([
-            'rfid_uid' => 'A1B2C3D4',
+            'rfid_uid' => 'DEADBEEF',
             'full_name' => 'Jan Kowalski',
-            'department' => 'Magazyn',
+            'department' => 'Produkcja',
         ]);
 
-        Carbon::setTestNow(Carbon::parse('2026-01-07 10:00:00'));
+        $response1 = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'de:ad-be ef',
+            ]);
 
-        $firstResponse = $this->withHeaders([
-            'X-Attendance-Device-Token' => $token,
-        ])->postJson('/api/attendance/tap', [
-            'cardIdentifier' => 'A1:B2:C3:D4',
+        $response1->assertOk();
+        $response1->assertJson([
+            'status' => 'ok',
+            'createdNewEvent' => true,
+            'employee' => [
+                'id' => $employee->id,
+            ],
+            'event' => [
+                'type' => 'entry',
+            ],
+            'presenceStatus' => 'present',
         ]);
 
-        $firstResponse->assertOk();
-        $firstResponse->assertJsonPath('event.type', 'entry');
+        $firstEventId = (int) $response1->json('event.id');
 
-        Carbon::setTestNow(Carbon::parse('2026-01-07 10:00:20'));
+        $response2 = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'DE AD BE EF',
+            ]);
 
-        $secondResponse = $this->withHeaders([
-            'X-Attendance-Device-Token' => $token,
-        ])->postJson('/api/attendance/tap', [
-            'cardIdentifier' => 'A1B2C3D4',
+        $response2->assertOk();
+        $response2->assertJson([
+            'status' => 'ok',
+            'createdNewEvent' => false,
+            'employee' => [
+                'id' => $employee->id,
+            ],
+            'event' => [
+                'id' => $firstEventId,
+                'type' => 'entry',
+            ],
+            'presenceStatus' => 'present',
         ]);
 
-        $secondResponse->assertOk();
-        $secondResponse->assertJsonPath('event.type', 'exit');
+        $this->travel(9)->seconds();
 
-        $this->assertDatabaseCount('attendance_events', 2);
+        $response3 = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'DEADBEEF',
+            ]);
+
+        $response3->assertOk();
+        $response3->assertJson([
+            'status' => 'ok',
+            'createdNewEvent' => true,
+            'employee' => [
+                'id' => $employee->id,
+            ],
+            'event' => [
+                'type' => 'exit',
+            ],
+            'presenceStatus' => 'absent',
+        ]);
 
         $this->assertDatabaseHas('attendance_events', [
             'employee_id' => $employee->id,
-            'event_type' => 'entry',
-        ]);
-
-        $this->assertDatabaseHas('attendance_events', [
-            'employee_id' => $employee->id,
+            'attendance_device_id' => $attendanceDevice->id,
             'event_type' => 'exit',
+            'metadata->rfidUid' => 'DEADBEEF',
         ]);
     }
 
-    public function testRequestDoesNotCreateDuplicateEventWithinLockWindow(): void
+    public function test_soft_deleted_employee_is_not_found_and_is_logged_as_unknown_attempt(): void
     {
-        config(['attendance.duplicate_event_lock_seconds' => 60]);
+        config(['attendance.duplicate_event_lock_seconds' => 8]);
 
-        $token = 'test-token';
-        $this->createAttendanceDevice($token);
+        [$attendanceDevice, $plainToken] = $this->createAttendanceDevice();
 
-        Employee::query()->create([
-            'rfid_uid' => 'A1B2C3D4',
-            'full_name' => 'Jan Kowalski',
-            'department' => 'Magazyn',
+        $employee = Employee::query()->create([
+            'rfid_uid' => 'CAFEBABE',
+            'full_name' => 'Anna Nowak',
+            'department' => null,
         ]);
 
-        Carbon::setTestNow(Carbon::parse('2026-01-07 10:00:00'));
+        $employee->delete();
 
-        $firstResponse = $this->withHeaders([
-            'X-Attendance-Device-Token' => $token,
-        ])->postJson('/api/attendance/tap', [
-            'cardIdentifier' => 'A1B2C3D4',
+        $response = $this
+            ->withHeader('X-Attendance-Device-Token', $plainToken)
+            ->postJson('/api/attendance/tap', [
+                'cardIdentifier' => 'CAFE-BABE',
+            ]);
+
+        $response->assertStatus(404);
+        $response->assertJson([
+            'status' => 'error',
+            'error' => [
+                'code' => 'employee_not_found',
+            ],
         ]);
 
-        $firstResponse->assertOk();
-        $this->assertDatabaseCount('attendance_events', 1);
-
-        $secondResponse = $this->withHeaders([
-            'X-Attendance-Device-Token' => $token,
-        ])->postJson('/api/attendance/tap', [
-            'cardIdentifier' => 'A1B2C3D4',
+        $this->assertDatabaseHas('attendance_events', [
+            'employee_id' => null,
+            'attendance_device_id' => $attendanceDevice->id,
+            'event_type' => 'unknown_card_attempt',
+            'metadata->rfidUid' => 'CAFEBABE',
+            'metadata->errorCode' => 'employee_not_found',
         ]);
-
-        $secondResponse->assertOk();
-        $this->assertDatabaseCount('attendance_events', 1);
-        $secondResponse->assertJsonPath('createdNewEvent', false);
     }
 
-    private function createAttendanceDevice(string $plainToken): AttendanceDevice
+    private function createAttendanceDevice(): array
     {
-        return AttendanceDevice::query()->create([
+        $plainToken = 'test-device-token';
+
+        $attendanceDevice = AttendanceDevice::query()->create([
             'name' => 'Test Device',
             'api_token_hash' => hash('sha256', $plainToken),
             'is_active' => true,
+            'last_seen_at' => null,
         ]);
+
+        return [$attendanceDevice, $plainToken];
     }
 }

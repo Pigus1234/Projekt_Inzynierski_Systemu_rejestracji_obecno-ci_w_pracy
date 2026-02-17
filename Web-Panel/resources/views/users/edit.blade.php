@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('pageTitle', 'Administrator')
+@section('pageTitle', 'Użytkownicy')
 @section('pageSubtitle', 'Edycja konta i uprawnień.')
 
 @section('content')
     <div class="w-full max-w-none space-y-6">
         <x-ui.card eyebrow="Konto" title="Edytuj użytkownika">
-            <form method="POST" action="{{ route('administrator.users.update', $user) }}" class="space-y-6">
+            <form method="POST" action="{{ route('users.update', $user) }}" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -36,7 +36,7 @@
                         autocomplete="new-password"
                     />
 
-                    <x-ui.form.select
+                    <x-ui.form.select-row
                         name="role_id"
                         label="Rola"
                         :items="$roles"
@@ -56,11 +56,7 @@
                     :selectedValues="$user->permissions->pluck('id')->all()"
                 />
 
-                <x-ui.form.actions
-                    :cancelUrl="route('administrator.users.index')"
-                    cancelLabel="Wróć"
-                    submitLabel="Zapisz"
-                />
+                <x-ui.form.actions :cancelUrl="route('users.index')" cancelVariant="secondary" />
             </form>
         </x-ui.card>
     </div>

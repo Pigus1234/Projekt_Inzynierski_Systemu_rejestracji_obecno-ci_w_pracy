@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Employees;
 
+use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Http\RedirectResponse;

@@ -11,9 +11,7 @@
                     Łącznie: {{ $attendanceDevices->count() }}
                 </div>
 
-                <a href="{{ route('administrator.attendance-devices.create') }}">
-                    <x-ui.button>Dodaj urządzenie</x-ui.button>
-                </a>
+                <x-ui.button :href="route('administrator.attendance-devices.create')">Dodaj urządzenie</x-ui.button>
             </div>
         </x-ui.card>
 

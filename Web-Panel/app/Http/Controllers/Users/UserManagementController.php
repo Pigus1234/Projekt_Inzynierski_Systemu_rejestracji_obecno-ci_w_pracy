@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Users;
 
+use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-class AdministratorUserController extends Controller
+class UserManagementController extends Controller
 {
     public function index(Request $request): View
     {
@@ -20,14 +21,14 @@ class AdministratorUserController extends Controller
             ->orderBy('name')
             ->paginate(15);
 
-        return view('administrator.users.index', [
+        return view('users.index', [
             'users' => $users,
         ]);
     }
 
     public function create(Request $request): View
     {
-        return view('administrator.users.create', [
+        return view('users.create', [
             'roles' => $this->rolesAvailableForUser($request->user()),
             'permissions' => Permission::query()->orderBy('label')->get(),
         ]);
@@ -56,7 +57,7 @@ class AdministratorUserController extends Controller
         $user->permissions()->sync($validated['permission_ids'] ?? []);
 
         return redirect()
-            ->route('administrator.users.index')
+            ->route('users.index')
             ->with('success', 'Użytkownik został utworzony.');
     }
 
@@ -66,7 +67,7 @@ class AdministratorUserController extends Controller
 
         $user->load(['role', 'permissions']);
 
-        return view('administrator.users.edit', [
+        return view('users.edit', [
             'user' => $user,
             'roles' => $this->rolesAvailableForUser($request->user()),
             'permissions' => Permission::query()->orderBy('label')->get(),
@@ -107,7 +108,7 @@ class AdministratorUserController extends Controller
         $user->permissions()->sync($validated['permission_ids'] ?? []);
 
         return redirect()
-            ->route('administrator.users.index')
+            ->route('users.index')
             ->with('success', 'Użytkownik został zaktualizowany.');
     }
 
@@ -117,14 +118,14 @@ class AdministratorUserController extends Controller
 
         if ((int) auth()->id() === (int) $user->id) {
             return redirect()
-                ->route('administrator.users.index')
+                ->route('users.index')
                 ->with('error', 'Nie możesz usunąć aktualnie zalogowanego konta.');
         }
 
         $user->delete();
 
         return redirect()
-            ->route('administrator.users.index')
+            ->route('users.index')
             ->with('success', 'Użytkownik został usunięty.');
     }
 

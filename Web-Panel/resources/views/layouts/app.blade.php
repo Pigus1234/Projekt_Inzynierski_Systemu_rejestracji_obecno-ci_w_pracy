@@ -14,7 +14,7 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_auto] sm:items-start">
                 <div class="min-w-0">
                     <h1 class="text-3xl font-semibold text-brandBlueDark">
-                        @yield('pageTitle', 'Dashboard')
+                        @yield('pageTitle', 'Pulpit')
                     </h1>
 
                     <p class="mt-2 text-sm text-slate-500">
@@ -23,18 +23,18 @@
 
                     <nav class="mt-4 flex flex-wrap gap-2">
                         <x-ui.nav.link :href="route('dashboard')" activePattern="dashboard">
-                            Dashboard
+                            Pulpit
                         </x-ui.nav.link>
+
+                        @can('users.manage')
+                            <x-ui.nav.link :href="route('users.index')" activePattern="users.*">
+                                Użytkownicy
+                            </x-ui.nav.link>
+                        @endcan
 
                         @can('employees.manage.view')
                             <x-ui.nav.link :href="route('employees.index')" activePattern="employees.*">
                                 Pracownicy
-                            </x-ui.nav.link>
-                        @endcan
-
-                        @can('administrator.panel')
-                            <x-ui.nav.link :href="route('administrator.users.index')" activePattern="administrator.*">
-                                Administrator
                             </x-ui.nav.link>
                         @endcan
 
@@ -63,7 +63,7 @@
 
                         @can('attendance.changelog.view')
                             <x-ui.nav.link :href="route('attendance.changelog')" activePattern="attendance.changelog">
-                                Changelog odbić
+                                Historia odbić
                             </x-ui.nav.link>
                         @endcan
 

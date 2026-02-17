@@ -34,11 +34,9 @@
                     Twoje konto
                 </div>
             @elseif($canManageThisUser)
-                <a href="{{ route('administrator.users.edit', $user) }}">
-                    <x-ui.button class="px-3 py-2">Edytuj</x-ui.button>
-                </a>
+                <x-ui.button :href="route('users.edit', $user)" class="px-3 py-2">Edytuj</x-ui.button>
 
-                <form method="POST" action="{{ route('administrator.users.destroy', $user) }}">
+                <form method="POST" action="{{ route('users.destroy', $user) }}">
                     @csrf
                     @method('DELETE')
 

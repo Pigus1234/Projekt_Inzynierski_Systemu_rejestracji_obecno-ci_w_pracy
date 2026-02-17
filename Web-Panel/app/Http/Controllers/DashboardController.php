@@ -18,6 +18,9 @@ class DashboardController extends Controller
         $onlineDevicesCount = null;
         $presentEmployeesCount = null;
 
+        $attendanceEventsCountLast24Hours = null;
+        $unknownCardAttemptsCountLast24Hours = null;
+
         if ($databaseOk) {
             $activeDevicesCount = AttendanceDevice::query()
                 ->where('is_active', true)
@@ -29,6 +32,17 @@ class DashboardController extends Controller
                 ->count();
 
             $presentEmployeesCount = $this->countPresentEmployees();
+
+            $last24HoursCutoff = now()->subHours(24);
+
+            $attendanceEventsCountLast24Hours = (int) DB::table('attendance_events')
+                ->where('occurred_at', '>=', $last24HoursCutoff)
+                ->count();
+
+            $unknownCardAttemptsCountLast24Hours = (int) DB::table('attendance_events')
+                ->where('event_type', AttendanceEventType::UnknownCardAttempt->value)
+                ->where('occurred_at', '>=', $last24HoursCutoff)
+                ->count();
         }
 
         $databaseStatusValue = $databaseOk ? 'OK' : 'Błąd połączenia';
@@ -46,6 +60,8 @@ class DashboardController extends Controller
             'rfidStatusValue' => $rfidStatusValue,
             'rfidStatusState' => $rfidStatusState,
             'presentEmployeesCount' => $presentEmployeesCount,
+            'attendanceEventsCountLast24Hours' => $attendanceEventsCountLast24Hours,
+            'unknownCardAttemptsCountLast24Hours' => $unknownCardAttemptsCountLast24Hours,
         ]);
     }
 

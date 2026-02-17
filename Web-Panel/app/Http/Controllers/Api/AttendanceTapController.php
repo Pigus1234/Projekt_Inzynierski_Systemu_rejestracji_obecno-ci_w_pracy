@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Attendance\AttendanceEventType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreAttendanceTapRequest;
+use App\Http\Requests\Attendance\StoreAttendanceTapRequest;
 use App\Models\AttendanceEvent;
 use App\Models\Employee;
 use Illuminate\Http\JsonResponse;

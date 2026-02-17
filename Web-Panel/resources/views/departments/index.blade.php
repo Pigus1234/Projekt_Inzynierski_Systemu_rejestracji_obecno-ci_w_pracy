@@ -8,19 +8,14 @@
         <x-ui.flash-messages />
 
         <x-ui.card eyebrow="Działy" title="Lista działów">
-            <div class="flex items-center justify-between gap-3">
-                <div class="text-sm text-slate-500">
-                    Wszystkie działy w systemie.
-                </div>
-
+            <x-ui.section-actions description="Wszystkie działy w systemie.">
                 @can('departments.manage')
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('departments.create') }}">
-                            <x-ui.button>Dodaj dział</x-ui.button>
-                        </a>
-                    </div>
+                    <x-slot:actions>
+                        <x-ui.button :href="route('departments.create')">Dodaj dział</x-ui.button>
+                    </x-slot:actions>
                 @endcan
-            </div>
+            </x-ui.section-actions>
+
 
             <x-ui.table>
                 <x-slot:header>
@@ -39,11 +34,9 @@
                         <x-ui.table.data-cell align="right">
                             <div class="flex flex-nowrap justify-end gap-2">
                                 @can('departments.manage')
-                                    <a class="w-32" href="{{ route('departments.edit', $department) }}">
-                                        <x-ui.button variant="secondary" class="w-full whitespace-nowrap">
-                                            Edytuj
-                                        </x-ui.button>
-                                    </a>
+                                    <x-ui.button :href="route('departments.edit', $department)" variant="secondary" class="w-32 whitespace-nowrap">
+                                        Edytuj
+                                    </x-ui.button>
                                 @endcan
 
                                 @can('departments.manage')
@@ -59,11 +52,7 @@
                         </x-ui.table.data-cell>
                     </tr>
                 @empty
-                    <tr>
-                        <x-ui.table.data-cell colspan="2">
-                            <div class="py-6 text-sm text-slate-500">Brak działów.</div>
-                        </x-ui.table.data-cell>
-                    </tr>
+                    <x-ui.table.empty-row colspan="2" message="Brak działów." />
                 @endforelse
             </x-ui.table>
 

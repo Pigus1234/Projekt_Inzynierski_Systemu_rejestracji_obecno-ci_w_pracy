@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('pageTitle', 'Changelog odbić')
+@section('pageTitle', 'Historia odbić')
 @section('pageSubtitle', 'Wejścia i wyjścia z możliwością filtrowania.')
 
 @section('content')

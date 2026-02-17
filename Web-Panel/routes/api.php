@@ -5,14 +5,12 @@ use App\Http\Controllers\Api\AttendanceTapController;
 use App\Http\Middleware\AuthenticateAttendanceDevice;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/attendance/tap', AttendanceTapController::class)
+Route::prefix('attendance')
     ->middleware([
         AuthenticateAttendanceDevice::class,
         'throttle:attendance-device',
-    ]);
-
-Route::get('/attendance/ping', AttendancePingController::class)
-    ->middleware([
-        AuthenticateAttendanceDevice::class,
-        'throttle:attendance-device',
-    ]);
+    ])
+    ->group(function (): void {
+        Route::post('/tap', AttendanceTapController::class);
+        Route::get('/ping', AttendancePingController::class);
+    });

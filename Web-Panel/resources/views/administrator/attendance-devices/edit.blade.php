@@ -17,15 +17,7 @@
                     :value="old('name', $attendanceDevice->name)"
                 />
 
-                <div class="flex justify-end gap-2">
-                    <a href="{{ route('administrator.attendance-devices.index') }}">
-                        <x-ui.button variant="secondary">Anuluj</x-ui.button>
-                    </a>
-
-                    <x-ui.button type="submit">
-                        Zapisz
-                    </x-ui.button>
-                </div>
+                <x-ui.form.actions :cancelUrl="route('administrator.attendance-devices.index')" cancelVariant="secondary" class="gap-2" />
             </form>
         </x-ui.card>
     </div>

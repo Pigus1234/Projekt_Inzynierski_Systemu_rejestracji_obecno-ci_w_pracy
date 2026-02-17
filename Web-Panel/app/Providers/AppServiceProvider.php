@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use App\Authorization\PermissionsGateRegistrar;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +16,15 @@ class AppServiceProvider extends ServiceProvider
     }
 
     public function boot(): void
+    {
+        Paginator::defaultView('pagination.tailwind');
+        
+        $this->configureAttendanceDeviceRateLimiter();
+
+        app(PermissionsGateRegistrar::class)->register();
+    }
+
+    private function configureAttendanceDeviceRateLimiter(): void
     {
         RateLimiter::for('attendance-device', function (Request $request) {
             $attendanceDevice = $request->attributes->get('attendanceDevice');
@@ -35,25 +44,5 @@ class AppServiceProvider extends ServiceProvider
                         ->withHeaders($headers);
                 });
         });
-
-        Gate::before(function (User $user): ?bool {
-            if ($user->role?->name === 'Administrator') {
-                return true;
-            }
-
-            return null;
-        });
-
-        Gate::define('administrator.only', function (User $user): bool {
-            return $user->role?->name === 'Administrator';
-        });
-
-        foreach (array_keys(config('permissions', [])) as $permissionKey) {
-            Gate::define($permissionKey, function (User $user) use ($permissionKey): bool {
-                return $user->permissions()
-                    ->where('key', $permissionKey)
-                    ->exists();
-            });
-        }
     }
 }

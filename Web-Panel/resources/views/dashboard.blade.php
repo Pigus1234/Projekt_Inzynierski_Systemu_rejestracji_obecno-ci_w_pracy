@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('pageTitle', 'Dashboard')
+@section('pageTitle', 'Pulpit')
 @section('pageSubtitle', 'Panel po zalogowaniu. Tu będą kluczowe informacje systemowe.')
 
 @section('content')
@@ -18,19 +18,21 @@
             </div>
         </x-ui.card>
 
-        <x-ui.card eyebrow="Szybkie akcje" title="Najczęstsze operacje">
-            <div class="space-y-3">
-                <x-ui.button class="w-full">
-                    Przejdź do listy pracowników
-                </x-ui.button>
+        <x-ui.card eyebrow="Statystyki" title="Odbicia (ostatnie 24h)">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-ui.dashboard.metric-tile
+                    label="Wszystkie odbicia"
+                    :value="$attendanceEventsCountLast24Hours"
+                />
 
-                <x-ui.button variant="danger" class="w-full">
-                    Drukuj listę ewakuacyjną
-                </x-ui.button>
+                <x-ui.dashboard.metric-tile
+                    label="Nieznane karty"
+                    :value="$unknownCardAttemptsCountLast24Hours"
+                />
             </div>
 
-            <div class="mt-4 text-xs text-slate-500">
-                Akcje podpinamy po dodaniu tras.
+            <div class="mt-4 text-sm text-slate-500">
+                {{ is_int($attendanceEventsCountLast24Hours) ? 'Zakres: ostatnie 24 godziny.' : 'Dane pojawią się po podpięciu bazy danych i zdarzeń odbić.' }}
             </div>
         </x-ui.card>
 

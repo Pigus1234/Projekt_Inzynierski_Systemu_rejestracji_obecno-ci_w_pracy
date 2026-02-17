@@ -8,21 +8,12 @@
         <x-ui.flash-messages />
 
         <x-ui.card eyebrow="Pracownicy" title="Lista pracowników">
-            <div class="flex items-center justify-between gap-3">
-                <div class="text-sm text-slate-500">
-                    Aktywni pracownicy w systemie.
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <a href="{{ route('employees.archived') }}">
-                        <x-ui.button class="px-3 py-2">Archiwum</x-ui.button>
-                    </a>
-
-                    <a href="{{ route('employees.create') }}">
-                        <x-ui.button>Dodaj pracownika</x-ui.button>
-                    </a>
-                </div>
-            </div>
+            <x-ui.section-actions description="Aktywni pracownicy w systemie.">
+                <x-slot:actions>
+                    <x-ui.button :href="route('employees.archived')" class="px-3 py-2">Archiwum</x-ui.button>
+                    <x-ui.button :href="route('employees.create')">Dodaj pracownika</x-ui.button>
+                </x-slot:actions>
+            </x-ui.section-actions>
 
             <x-ui.table>
                 <x-slot:header>
@@ -36,11 +27,7 @@
                 @forelse($employees as $employee)
                     <x-employees.table-row :employee="$employee" />
                 @empty
-                    <tr>
-                        <x-ui.table.data-cell colspan="3">
-                            <div class="py-6 text-sm text-slate-500">Brak pracowników.</div>
-                        </x-ui.table.data-cell>
-                    </tr>
+                    <x-ui.table.empty-row colspan="3" message="Archiwum jest puste." />
                 @endforelse
             </x-ui.table>
 

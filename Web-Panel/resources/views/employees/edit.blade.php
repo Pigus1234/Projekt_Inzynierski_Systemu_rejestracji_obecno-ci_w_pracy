@@ -27,41 +27,15 @@
                         value="{{ $employee->full_name }}"
                     />
 
-                <div class="min-w-0 md:col-span-2 flex flex-col gap-2 md:flex-row md:items-center md:gap-5">
-                    <label class="block text-sm font-medium text-slate-700 md:w-1/2" for="department">
-                        Dział (opcjonalnie)
-                    </label>
-
-                    <div class="min-w-0 w-full md:w-1/2 md:ml-auto">
-                        <select
-                            id="department"
-                            name="department"
-                            class="mt-2 md:mt-0 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brandBlue focus:ring-2 focus:ring-brandBlue/20"
-                        >
-                            <option value="">—</option>
-
-                            @foreach($departmentOptions as $departmentOption)
-                                <option value="{{ $departmentOption }}" @selected(old('department', $departmentSelectedValue) === $departmentOption)>
-                                    {{ $departmentOption }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        @if($departmentSelectionHint)
-                            <div class="mt-2 text-sm text-amber-700">{{ $departmentSelectionHint }}</div>
-                        @endif
-
-                        @error('department')
-                            <div class="mt-2 text-sm text-brandRed">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <x-ui.form.actions
-                    :cancelUrl="route('employees.index')"
-                    cancelLabel="Wróć"
-                    submitLabel="Zapisz"
+                <x-ui.form.select-row
+                    name="department"
+                    label="Dział (opcjonalnie)"
+                    :items="$departmentOptions"
+                    :selectedValue="$departmentSelectedValue"
+                    :hint="$departmentSelectionHint"
                 />
+
+                <x-ui.form.actions :cancelUrl="route('employees.index')" cancelVariant="secondary" />
             </form>
         </x-ui.card>
     </div>

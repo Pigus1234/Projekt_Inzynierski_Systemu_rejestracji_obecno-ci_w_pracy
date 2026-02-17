@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('pageTitle', 'Administrator')
+@section('pageTitle', 'Użytkownicy')
 @section('pageSubtitle', 'Tworzenie konta użytkownika.')
 
 @section('content')
     <div class="w-full max-w-none space-y-6">
         <x-ui.card eyebrow="Konto" title="Dodaj użytkownika">
-            <form method="POST" action="{{ route('administrator.users.store') }}" class="space-y-6">
+            <form method="POST" action="{{ route('users.store') }}" class="space-y-6">
                 @csrf
 
                 <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -17,7 +17,7 @@
                 <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <x-ui.form.text-input name="password" label="Hasło" type="password" autocomplete="new-password" required="true" />
 
-                    <x-ui.form.select
+                    <x-ui.form.select-row
                         name="role_id"
                         label="Rola"
                         :items="$roles"
@@ -25,6 +25,7 @@
                         labelProperty="name"
                         required="true"
                     />
+
                 </div>
 
                 <x-ui.form.checkbox-group
@@ -35,10 +36,7 @@
                     labelProperty="label"
                 />
 
-                <x-ui.form.actions
-                    :cancelUrl="route('administrator.users.index')"
-                    submitLabel="Zapisz"
-                />
+                <x-ui.form.actions :cancelUrl="route('users.index')" cancelVariant="secondary" />
             </form>
         </x-ui.card>
     </div>

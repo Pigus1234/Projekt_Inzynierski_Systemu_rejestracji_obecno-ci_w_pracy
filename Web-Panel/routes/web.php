@@ -1,15 +1,15 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AdministratorUserController;
-use App\Http\Controllers\DepartmentManagementController;
-use App\Http\Controllers\ArchivedEmployeeManagementController;
+use App\Http\Controllers\Users\UserManagementController;
+use App\Http\Controllers\Users\UserSessionController;
+use App\Http\Controllers\Departments\DepartmentManagementController;
+use App\Http\Controllers\Employees\ArchivedEmployeeManagementController;
+use App\Http\Controllers\Employees\EmployeeManagementController;
 use App\Http\Controllers\Attendance\AttendanceChangelogController;
 use App\Http\Controllers\Attendance\AttendanceDeviceManagementController;
 use App\Http\Controllers\Attendance\AttendancePresentController;
 use App\Http\Controllers\Attendance\AttendanceEvacuationListPrintController;
-use App\Http\Controllers\EmployeeManagementController;
-use App\Http\Controllers\UserSessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -24,32 +24,33 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [UserSessionController::class, 'destroySession'])->name('logout');
 });
 
-Route::middleware(['auth', 'can:administrator.panel'])
-    ->prefix('administrator')
-    ->name('administrator.')
+Route::middleware(['auth', 'can:users.manage'])
+    ->prefix('users')
+    ->name('users.')
     ->group(function (): void {
-        Route::get('/users', [AdministratorUserController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [AdministratorUserController::class, 'create'])->name('users.create');
-        Route::post('/users', [AdministratorUserController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [AdministratorUserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [AdministratorUserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [AdministratorUserController::class, 'destroy'])->name('users.destroy');
+        Route::get('/', [UserManagementController::class, 'index'])->name('index');
+        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::post('/', [UserManagementController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserManagementController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
+    });
 
-        Route::prefix('attendance-devices')
-            ->name('attendance-devices.')
-            ->group(function (): void {
-                Route::get('/', [AttendanceDeviceManagementController::class, 'index'])->name('index');
-                Route::get('/create', [AttendanceDeviceManagementController::class, 'create'])->name('create');
-                Route::post('/', [AttendanceDeviceManagementController::class, 'store'])->name('store');
+Route::middleware(['auth', 'can:administrator.only'])
+    ->prefix('administrator/attendance-devices')
+    ->name('administrator.attendance-devices.')
+    ->group(function (): void {
+        Route::get('/', [AttendanceDeviceManagementController::class, 'index'])->name('index');
+        Route::get('/create', [AttendanceDeviceManagementController::class, 'create'])->name('create');
+        Route::post('/', [AttendanceDeviceManagementController::class, 'store'])->name('store');
 
-                Route::get('/{attendanceDevice}/edit', [AttendanceDeviceManagementController::class, 'edit'])->name('edit');
-                Route::put('/{attendanceDevice}', [AttendanceDeviceManagementController::class, 'update'])->name('update');
+        Route::get('/{attendanceDevice}/edit', [AttendanceDeviceManagementController::class, 'edit'])->name('edit');
+        Route::put('/{attendanceDevice}', [AttendanceDeviceManagementController::class, 'update'])->name('update');
 
-                Route::post('/{attendanceDevice}/rotate-token', [AttendanceDeviceManagementController::class, 'rotateToken'])->name('rotate-token');
+        Route::post('/{attendanceDevice}/rotate-token', [AttendanceDeviceManagementController::class, 'rotateToken'])->name('rotate-token');
 
-                Route::patch('/{attendanceDevice}/activate', [AttendanceDeviceManagementController::class, 'activate'])->name('activate');
-                Route::patch('/{attendanceDevice}/deactivate', [AttendanceDeviceManagementController::class, 'deactivate'])->name('deactivate');
-            });
+        Route::patch('/{attendanceDevice}/activate', [AttendanceDeviceManagementController::class, 'activate'])->name('activate');
+        Route::patch('/{attendanceDevice}/deactivate', [AttendanceDeviceManagementController::class, 'deactivate'])->name('deactivate');
     });
     
 Route::middleware(['auth', 'can:departments.manage'])

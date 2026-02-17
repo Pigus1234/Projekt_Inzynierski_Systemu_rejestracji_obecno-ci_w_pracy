@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('pageTitle', 'Administrator')
+@section('pageTitle', 'Użytkownicy')
 @section('pageSubtitle', 'Zarządzanie kontami i uprawnieniami.')
 
 @section('content')
@@ -10,7 +10,7 @@
         <x-ui.card eyebrow="Konta" title="Użytkownicy systemu">
             <x-ui.section-actions
                 description="Lista wszystkich kont w systemie."
-                :actionUrl="route('administrator.users.create')"
+                :actionUrl="route('users.create')"
                 actionLabel="Dodaj użytkownika"
             />
 
@@ -25,7 +25,7 @@
                 </x-slot:header>
 
                 @foreach($users as $user)
-                    <x-administrator.users.table-row :user="$user" />
+                    <x-users.table-row :user="$user" />
                 @endforeach
             </x-ui.table>
 
